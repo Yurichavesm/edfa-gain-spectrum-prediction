@@ -14,4 +14,16 @@ Os dados estão em `https://github.com/ofc-ml-challenge/ofc-ml-challenge-data-co
 
 **Exportação:** `scripts/exportar_artefatos_databricks_corrigido.py` deve ser colado em uma única célula de um notebook Python no Databricks. O ZIP é criado em disco local antes de ser copiado para o Volume. Não executar esse exportador antes de gerar os artefatos.
 
-**Figuras:** `scripts/gerar_figuras.py` contém os diagramas e visualizações baseadas no histórico e predições; executar após completar o pipeline.
+## Figuras do relatório
+O **mesmo notebook principal** agora contém a seção **10. Figuras do relatório (1 a 6)** com o código das seis figuras e exibição de PNGs no próprio notebook. Essas células ficam **depois da auditoria**, sem modificar o treinamento. A seção pode ser executada isoladamente se os arquivos de histórico e previsões já existirem no Volume.
+
+- Figuras 1 a 3: esquemas conceituais do EDFA, do fluxo metodológico e da MLP.
+- Figura 4: histórico de validação COSMOS em 48 épocas.
+- Figuras 5 e 6: medidas reais e previsões TestGround online. Antes de renderizar, as células verificam o MAE global, o MAE por cenário, as partições Public/Private e o MAE agregado por canal WSS ativo.
+- Local de saída: `/Volumes/workspace/default/ofc2026/resultados/modelagem_espectral_transferencia/figuras_relatorio/` (PNG e PDF). Os arquivos são criados primeiro em disco local e depois copiados para o Volume.
+
+Também é possível gerar as figuras sem abrir o notebook utilizando `scripts/gerar_figuras.py`.
+
+**Nota de validação:** as células de figuras foram verificadas quanto à sintaxe, às dependências e à geração PNG/PDF em teste com dados artificiais; **a nova seção de figuras ainda precisa ser executada no Databricks com os dados oficiais**. O treinamento principal já teve seus outputs auditados anteriormente.
+
+**Conferência do relatório:** veja [Auditoria cruzada do relatório, notebook e figuras](docs/AUDITORIA_CRUZADA_RELATORIO_2026-11-23.md) para correções de legenda, da equação (3), de Public/Private e dos resultados históricos que não são calculados pelo pipeline essencial.
