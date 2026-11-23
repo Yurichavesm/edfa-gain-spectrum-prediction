@@ -68,22 +68,26 @@ def figura1(destino):
 
 
 def figura2(destino):
-    fig, ax = plt.subplots(figsize=(11,4.8))
-    ax.set_xlim(0, 10); ax.set_ylim(0, 6); ax.axis('off')
-    bloco(ax, .2, 3.75, 2.55, 1.1, 'COSMOS\n138.624 observações')
-    bloco(ax, 3.7, 3.75, 2.4, 1.1, 'Pré-treinamento\nMLP (48 épocas)')
-    bloco(ax, 7.0, 3.75, 2.7, 1.1, 'Checkpoint inicial\npré-treinado')
-    bloco(ax, .2, 1.1, 2.55, 1.1, 'Challenge Train\n490 observações')
-    bloco(ax, 3.7, 1.1, 2.4, 1.1, 'Ajuste fino\n(40 épocas)')
-    bloco(ax, 7.0, 1.1, 2.7, 1.1, 'MLP final\n204 → 95')
-    seta(ax, 2.8, 4.3, 3.65, 4.3)
-    seta(ax, 6.15, 4.3, 6.95, 4.3)
-    seta(ax, 8.35, 3.7, 8.35, 2.25)
-    seta(ax, 2.8, 1.65, 3.65, 1.65)
-    seta(ax, 6.15, 1.65, 6.95, 1.65)
-    ax.text(5.0, .22, 'TestGround online: avaliação retrospectiva; não usado no ajuste de pesos',
-            ha='center', fontsize=10)
-    ax.set_title('Figura 2 — Fluxo experimental', pad=8)
+    """Fluxo experimental: ambos checkpoint e Challenge entram no ajuste fino."""
+    fig, ax = plt.subplots(figsize=(13, 4.8))
+    ax.set_xlim(0, 14); ax.set_ylim(0, 5.7); ax.axis('off')
+    bloco(ax, .2, 3.65, 2.4, 1.05, 'COSMOS\n138.624 observações', 10)
+    bloco(ax, 3.05, 3.65, 2.55, 1.05, 'Pré-treinamento MLP\n48 épocas', 10)
+    bloco(ax, 6.1, 3.65, 2.5, 1.05, 'Checkpoint\npré-treinado', 10)
+    bloco(ax, .2, 1.08, 2.4, 1.05, 'Challenge Train\n490 observações', 10)
+    bloco(ax, 6.1, 1.08, 2.5, 1.05, 'Ajuste fino\n40 épocas', 10)
+    bloco(ax, 9.15, 1.08, 1.7, 1.05, 'MLP final\n95 saídas', 10)
+    bloco(ax, 11.32, .94, 2.45, 1.33,
+          'Avaliação retrospectiva\nTestGround online\n21.056 observações', 9)
+    seta(ax, 2.65, 4.17, 3.00, 4.17)
+    seta(ax, 5.65, 4.17, 6.05, 4.17)
+    seta(ax, 7.35, 3.60, 7.35, 2.18)
+    seta(ax, 2.65, 1.60, 6.05, 1.60)
+    seta(ax, 8.65, 1.60, 9.10, 1.60)
+    seta(ax, 10.90, 1.60, 11.27, 1.60)
+    ax.text(7.57, 2.92, 'Transferência\ndos pesos',
+            fontsize=9, ha='left', va='center')
+    ax.set_title('Figura 2 — Fluxo metodológico do estudo', pad=10, fontsize=13)
     salvar(fig, destino, 'figura_02_pipeline')
 
 
