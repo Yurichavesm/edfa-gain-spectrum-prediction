@@ -8,7 +8,7 @@ Repositório preparado a partir dos notebooks do estudo dirigido OFC 2026. **Som
 
 **Dependências:** Python, numpy, pandas, torch, scikit-learn, matplotlib para figuras. O pré-processamento utiliza código original dos autores SJTU, `https://github.com/kayneZhu/ofc_ml`, commit `61c9788c20ad5052cd5bedc089d1784c504871d2`. A arquitetura MLP e protocolo residual pertencem a este estudo.
 
-**Ressalva:** o notebook filtrado foi reconstruído a partir das células originais e verificado sintaticamente, mas não foi reexecutado no Databricks com os datasets oficiais. Para validar a reprodutibilidade integral, é necessário realizar essa execução limpa e comparar os checkpoints, as métricas e o ambiente de software. Os checkpoints podem não reproduzir bit a bit em ambientes distintos.
+**Validação de execução (23/11/2026):** o autor enviou o notebook filtrado após execução no Databricks com os dados oficiais. A análise dos outputs confirmou o treinamento em etapas, o ajuste fino, o MAE TestGround de **0,124232492 dB** e a auditoria do checkpoint. As nove células originais de código correspondem às publicadas aqui; foi acrescentada uma célula de instalação de PyTorch. Veja [o registro de validação](docs/VALIDACAO_EXECUCAO_2026-11-23.md). Esta conferência foi realizada sobre os outputs enviados, **sem uma reexecução independente em outro ambiente**. Checkpoints podem não reproduzir bit a bit entre ambientes distintos.
 
 Os dados estão em `https://github.com/ofc-ml-challenge/ofc-ml-challenge-data-code`.
 
