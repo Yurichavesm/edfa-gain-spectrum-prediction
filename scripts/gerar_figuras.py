@@ -162,6 +162,10 @@ def carregar_validar(root, resultados):
         sub = erro[usage.eq(nome).to_numpy()]
         if len(sub)!=n or not np.isclose(sub.mean(),mae_esperado,rtol=0,atol=1e-5):
             raise ValueError(f'Partição {nome} inesperada: n={len(sub)}, MAE={sub.mean()}')
+    mae_canal_ativo = float(np.mean(np.abs(Y[M]-P[M])))
+    if not np.isclose(mae_canal_ativo,0.106953,rtol=0,atol=1e-5):
+        raise ValueError(f'MAE por canal ativo inesperado: {mae_canal_ativo}')
+    print(f'MAE global por canal ativo: {mae_canal_ativo:.6f} dB')
     print('Conferência por cenário e Public/Private: aprovada')
     return X,Y,P,M,erro
 
