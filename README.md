@@ -24,6 +24,9 @@ O **mesmo notebook principal** agora contém a seção **10. Figuras do relatór
 
 Também é possível gerar as figuras sem abrir o notebook utilizando `scripts/gerar_figuras.py`.
 
+**Validação final das figuras sem dependência de variáveis:** após gerar os PNGs/PDFs, execute a seção **11. Validação independente dos seis gráficos e resultados** do notebook ou `scripts/validar_figuras_resultados.py`. Essa rotina relê os CSVs do TestGround e as previsões salvas; não depende de `FIG_DADOS` nem do estado da sessão e não refaz o treinamento.
+
+
 **Nota de validação:** as células de figuras foram verificadas quanto à sintaxe, às dependências e à geração PNG/PDF em teste com dados artificiais; **a nova seção de figuras ainda precisa ser executada no Databricks com os dados oficiais**. O treinamento principal já teve seus outputs auditados anteriormente.
 
 **Conferência do relatório:** veja [Auditoria cruzada do relatório, notebook e figuras](docs/AUDITORIA_CRUZADA_RELATORIO_2026-11-23.md) para correções de legenda, da equação (3), de Public/Private e dos resultados históricos que não são calculados pelo pipeline essencial.
