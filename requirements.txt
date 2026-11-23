@@ -1,0 +1,6 @@
+# O ambiente exato de treino deve ser registrado no Databricks antes da reexecução limpa.
+numpy
+pandas
+torch
+scikit-learn==1.7.2
+matplotlib
