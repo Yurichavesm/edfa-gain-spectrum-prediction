@@ -2,6 +2,8 @@
 
 Dados reais somente: as figuras 4, 5 e 6 lêem históricos, rótulos
 TestGround e previsões auditadas; nenhuma série é sintetizada.
+Figuras 1 a 3 sao esquemas conceituais. Gera PNG/PDF em arquivo temporario local
+e depois copia ao Volume, evitando escrita aleatoria no Unity Catalog.
 
 Execução em Databricks:
   python scripts/gerar_figuras.py --root /Volumes/workspace/default/ofc2026
@@ -11,6 +13,8 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import tempfile
+import shutil
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -25,8 +29,13 @@ COLUNAS_MASK = [f'DUT_WSS_activated_channel_index_{i:02d}' for i in range(N_CANA
 
 def salvar(fig, destino, nome):
     destino.mkdir(parents=True, exist_ok=True)
-    for ext in ('png', 'pdf'):
-        fig.savefig(destino / f'{nome}.{ext}', dpi=240, bbox_inches='tight')
+    # Gera em disco local: alguns sistemas de arquivo (Unity Catalog
+    # Volumes) não suportam todas as operações de escrita do backend PDF.
+    with tempfile.TemporaryDirectory(prefix='edfa_fig_') as temp:
+        for ext in ('png', 'pdf'):
+            origem = Path(temp) / f'{nome}.{ext}'
+            fig.savefig(origem, dpi=240, bbox_inches='tight')
+            shutil.copyfile(origem, destino / origem.name)
     plt.close(fig)
     print(f'Figura salva: {destino / (nome + ".png")}')
 
@@ -130,7 +139,7 @@ def carregar_validar(root, resultados):
     Y = pd.read_csv(root/'Features/TestGround/test_labels.csv')[COLUNAS_LABEL].to_numpy(float)
     P = pd.read_csv(resultados/'predicoes_mlp_v2_48ep_testground.csv')[COLUNAS_LABEL].to_numpy(float)
     M = X[COLUNAS_MASK].to_numpy(bool)
-    if Y.shape != P.shape or P.shape != M.shape or P.shape[1] != 95:
+    if Y.shape != P.shape or P.shape != M.shape or P.shape != (21056,95):
         raise ValueError(f'Dimensões incompatíveis: Y={Y.shape}, P={P.shape}, M={M.shape}')
     if not (M.sum(axis=1)>0).all():
         raise ValueError('Observações sem canais ativos')
@@ -140,6 +149,20 @@ def carregar_validar(root, resultados):
     print(f'MAE local reproduzido: {erro.mean():.9f} dB')
     if not np.isclose(erro.mean(), 0.124232492, rtol=0, atol=1e-5):
         raise ValueError('O MAE não coincide com o resultado auditado; conferir arquivos!')
+    cat = X['Category'].str.lower()
+    for nome,n,mae_esperado in [('aging',4400,0.087264),
+                                 ('shb',864,0.105130),
+                                 ('unseen',15792,0.135578)]:
+        sub = erro[cat.eq(nome).to_numpy()]
+        if len(sub)!=n or not np.isclose(sub.mean(),mae_esperado,rtol=0,atol=1e-5):
+            raise ValueError(f'Cenário {nome} inesperado: n={len(sub)}, MAE={sub.mean()}')
+    usage = X['Usage'].astype(str)
+    for nome,n,mae_esperado in [('Public',10528,0.127922),
+                                 ('Private',10528,0.120543)]:
+        sub = erro[usage.eq(nome).to_numpy()]
+        if len(sub)!=n or not np.isclose(sub.mean(),mae_esperado,rtol=0,atol=1e-5):
+            raise ValueError(f'Partição {nome} inesperada: n={len(sub)}, MAE={sub.mean()}')
+    print('Conferência por cenário e Public/Private: aprovada')
     return X,Y,P,M,erro
 
 
@@ -165,7 +188,7 @@ def figura5(destino, X, Y, P, M, erro):
         ax.scatter(canais,P[idx,canais],s=40,marker='x',label='Previsto')
         ax.set_xlim(-1,95)
         ax.set_xlabel('Índice do canal óptico')
-        ax.set_title(f'{cat.upper()} | n={len(canais)} canais | MAE={erro[idx]:.3f} dB',fontsize=10)
+        ax.set_title(f'{cat.upper()}\nMAE = {erro[idx]:.4f} dB',fontsize=10)
         ax.grid(alpha=.2)
         ax.legend(fontsize=8)
         escolhidos.append({'cenario':cat,'indice_linha_csv':idx,
@@ -181,34 +204,34 @@ def figura5(destino, X, Y, P, M, erro):
 
 
 def figura6(destino, X, erro):
+    """Boxplot da distribuicao do MAE por registro, como no relatorio.
+
+    Hastes P5--P95, todos os pontos fora da faixa mostrados; valores
+    nulos ou abaixo do limite positivo do eixo log nao sao desenhados.
+    """
     categorias = X['Category'].str.lower().to_numpy()
     grupos = [erro[categorias==cat] for cat in ('aging','shb','unseen')]
     fig, ax = plt.subplots(figsize=(9,4.8))
     ax.boxplot(grupos, tick_labels=['Aging','SHB','Unseen'],
-               whis=(5,95),showfliers=False,patch_artist=False)
-    rng = np.random.default_rng(42)
-    for j,(cat,v) in enumerate(zip(('aging','shb','unseen'),grupos),start=1):
-        limiar = np.quantile(v,0.995)
-        ext = v[v>limiar]
-        if len(ext):
-            ax.scatter(j+rng.uniform(-.13,.13,len(ext)),ext,marker='.',s=12,
-                       alpha=.65, label='Extremos > P99,5' if j==1 else None)
+               whis=(5,95), showfliers=True,
+               flierprops={'marker':'.','markersize':2,'alpha':.3})
     ax.set_yscale('log')
-    ax.set_ylim(bottom=1e-4)
-    ax.set_ylabel('MAE por observação (dB) — escala log')
-    ax.set_title('Figura 6 — Distribuição do erro por cenário')
+    ax.set_ylim(bottom=1e-5)
+    ax.set_ylabel('MAE por observação (dB) — escala logarítmica')
+    ax.set_title('Figura 6 — Distribuição do MAE por cenário')
     ax.grid(axis='y',alpha=.25,which='both')
-    ax.text(.01,-.16,'Caixa: Q1–Q3; hastes: P5–P95; pontos: acima de P99,5. '
-            'Erros inferiores a 10⁻⁴ dB ficam fora da escala visível.',
-            transform=ax.transAxes,fontsize=8)
     fig.tight_layout()
     salvar(fig,destino,'figura_06_distribuicao_mae')
     resumo = []
     for cat,v in zip(('aging','shb','unseen'),grupos):
         resumo.append({'cenario':cat,'n':len(v),'mae_medio':np.mean(v),
                        'mediana':np.median(v),'p95':np.quantile(v,.95),
-                       'p99':np.quantile(v,.99),'maximo':np.max(v)})
-    pd.DataFrame(resumo).to_csv(destino/'figura_06_resumo_mae.csv',index=False)
+                       'p99':np.quantile(v,.99),'maximo':np.max(v),
+                       'erros_iguais_zero':int((v==0).sum())})
+    tab = pd.DataFrame(resumo)
+    tab.to_csv(destino/'figura_06_resumo_mae.csv',index=False)
+    print('Resumo por cenário:')
+    print(tab.to_string(index=False))
 
 
 def main():
