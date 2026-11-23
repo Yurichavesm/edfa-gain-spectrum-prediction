@@ -1,3 +1,12 @@
+## Notebooks: código e execução auditada
+
+- **[Notebook essencial (fonte atualizada, sem outputs)](notebooks/01_pipeline_mlp_essencial.ipynb):** versão de reprodução com a Figura 2 corrigida para mostrar o checkpoint e o Challenge convergindo no ajuste fino.
+- **[Notebook executado no Databricks (com todos os outputs)](notebooks/01_pipeline_mlp_essencial_executado_com_outputs.ipynb):** exportação original enviada pelo autor, preservada para rastreabilidade; inclui os logs de treinamento, validação cruzada, auditoria final e **seis figuras incorporadas**.
+
+**Nota importante sobre proveniência:** o notebook executado representa a execução original fornecida e contém uma versão anterior do código de desenho da Figura 2. Essa alteração afeta **somente o diagrama**, não os pesos, hiperparâmetros, métricas ou previsões da MLP. O notebook de reprodução contém o desenho corrigido, e o PDF do relatório utiliza esse fluxo metodológico correto. Preservamos as saídas tal como executadas, sem alterá-las nem apresentá-las como se viessem de uma nova execução.
+
+Confira a [auditoria do relatório (versão 5) e dos outputs](docs/VALIDACAO_RELATORIO_V5_E_OUTPUTS.md).
+
 # Predição do espectro de ganho em EDFAs — pipeline essencial
 
 Repositório preparado a partir dos notebooks do estudo dirigido OFC 2026. **Somente os componentes da MLP residual final** estão incluídos: preprocessor SJTU (commit fixado), divisão COSMOS, pré-treinamento em etapas (8, 24, 48 épocas), validação cruzada agrupada, ajuste fino Challenge, avaliação TestGround e auditoria. Não há experimentos descartados com FFT, Ridge, CatBoost, GPR, CNN ou ensembles.
